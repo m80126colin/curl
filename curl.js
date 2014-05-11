@@ -1,8 +1,8 @@
 var SEMA_LIMIT	= 1,
 	NEWS_LIMIT	= 356,
-	START		= process.argv[2],
+	START		= parseInt(process.argv[2]),
 	FILE		= process.argv[3],
-	PARTITION	= process.argv[4];
+	PARTITION	= parseInt(process.argv[4]);
 
 var fs			= require('fs'),
 	request		= require('request'),
