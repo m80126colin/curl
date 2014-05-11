@@ -1,5 +1,5 @@
-var SEMA_LIMIT	= 5,
-	NEWS_LIMIT	= 100;
+var SEMA_LIMIT	= 3,
+	NEWS_LIMIT	= 356000;
 
 var fs			= require('fs'),
 	request		= require('request'),
@@ -26,7 +26,7 @@ var _req	= function() {
 			console.log(res.request.href, $('article').length);
 			visited[i]	= 1;
 			record[i]	= {
-				'href':		res.request.href,
+				'id':		i,
 				'valid':	$('article').length
 			};
 			sema++;
@@ -46,7 +46,7 @@ var _final	= function() {
 			if (visited[i] == 0)
 				console.log('News', i, 'unload.');
 			else if (record[i].valid)
-				result.push(record[i].href);
+				result.push(record[i].id);
 		}
 		fs.writeFile('result.json', JSON.stringify(result),
 			function (e) {
