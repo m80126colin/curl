@@ -1,12 +1,15 @@
-var SEMA_LIMIT	= 3,
-	NEWS_LIMIT	= 356000;
+var SEMA_LIMIT	= 1,
+	NEWS_LIMIT	= 356,
+	START		= process.args[2],
+	FILE		= process.args[3],
+	PARTITION	= process.args[4];
 
 var fs			= require('fs'),
 	request		= require('request'),
 	cheerio		= require('cheerio'),
 	url			= 'http://www.ettoday.net/news/0/',
 	sema		= SEMA_LIMIT,
-	count		= 0,
+	count		= START,
 	flag		= 0,
 	visited		= new Array(NEWS_LIMIT + 1),
 	record		= new Array(NEWS_LIMIT + 1);
@@ -20,11 +23,10 @@ var _req	= function() {
 		var i		= count;
 		var tmp		= url + i + '.htm';
 		// console.log('Try:', tmp);
-		count++;
+		count += PARTITION;
 		request.get(tmp, function (e, res, body) {
 			var $	= cheerio.load(body);
-			if (i % 100 == 0)
-				console.log('Reach:', i);
+			console.log('Reach:', i);
 			visited[i]	= 1;
 			record[i]	= {
 				'id':		i,
@@ -49,7 +51,7 @@ var _final	= function() {
 			else if (record[i].valid)
 				result.push(record[i].id);
 		}
-		fs.writeFile('result.json', JSON.stringify(result),
+		fs.writeFile(FILE, JSON.stringify(result),
 			function (e) {
 				if (e) throw e;
 		});
