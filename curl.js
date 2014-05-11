@@ -23,7 +23,8 @@ var _req	= function() {
 		count++;
 		request.get(tmp, function (e, res, body) {
 			var $	= cheerio.load(body);
-			console.log(res.request.href, $('article').length);
+			if (i % 100 == 0)
+				console.log('Reach:', i);
 			visited[i]	= 1;
 			record[i]	= {
 				'id':		i,
