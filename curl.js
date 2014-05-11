@@ -45,7 +45,7 @@ var _final	= function() {
 		flag = 1;
 		var result = [];
 		console.log('Complete Scan.');
-		for (var i = 0; i <= NEWS_LIMIT; i++) {
+		for (var i = START; i <= NEWS_LIMIT; i += PARTITION) {
 			if (visited[i] == 0)
 				console.log('News', i, 'unload.');
 			else if (record[i].valid)
