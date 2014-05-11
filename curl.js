@@ -19,7 +19,7 @@ var _req	= function() {
 		sema--;
 		var i		= count;
 		var tmp		= url + i + '.htm';
-		console.log('Try:', tmp);
+		// console.log('Try:', tmp);
 		count++;
 		request.get(tmp, function (e, res, body) {
 			var $	= cheerio.load(body);
