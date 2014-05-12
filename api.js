@@ -2,37 +2,41 @@ var express		= require('express'),
 	request		= require('request'),
 	cheerio		= require('cheerio'),
 	host		= 'localhost',
-	port		= '8201',
-	controller	= {
+	port		= '8201';
+var controller	= {
 	ettoday: function(req, res) {
 		var id		= req.param('id'),
 			url		= 'http://www.ettoday.net/news/0/' + id + '.htm';
 		request.get(url, function (e, resp, body) {
-			var record;
+			var record = {};
 			if (resp.statusCode == 200) {
-				var $		= cheerio.load(body),
-					art		= $('article'),
-					d		= $('.news-time').text().match(/(\d+)/g),
-					tags	= $('#news-keywords strong', art);
-				for (var i = 0; i < tags.length; i++)
-					tags[i]	= $(tags[i]).text();
-				d		= (d.length > 3)?
-					(new Date(d[0], d[1] - 1, d[2], d[3], d[4])):
-					(new Date(d[0], d[1] - 1, d[2]));
-				record	= {
-					'valid':	art.length,
-					'id':		id,
-					'link':		url,
-					'media':	'ETtoday',
-					'title':	$('header h2', art).text(),
-					'time':		d.getTime(),
-					'tag':		tags
-				};
+				var $			= cheerio.load(body);
+				record.valid	= $('article').length;
+				if (record.valid) {
+					var art		= $('article'),
+						d		= $('.news-time').text()
+									.match(/(\d+)/g),
+						r_tag	= $('#news-keywords strong', art),
+						tags	= [],
+						date	= '';
+					for (var i = 0; i < r_tag.length; i++)
+						tags.push($(r_tag[i]).text());
+					date	= (d.length > 3)?
+						(new Date(d[0], d[1] - 1, d[2], d[3], d[4])):
+						(new Date(d[0], d[1] - 1, d[2]));
+					record.id		= id;
+					record.link		= resp.request.href;
+					record.media	= 'ETtoday',
+					record.author	= '',
+					record.site		= '',
+					record.content	= $('sectione>p', art).text(),
+					record.title	= $('header h2', art).text();
+					record.time		= date.getTime();
+					record.tag		= tags;
+				}
 			}
 			else {
-				record = {
-					'error': resp.statusCode
-				};
+				record.error	= resp.statusCode;
 			}
 			res.json(record);
 		});
@@ -40,5 +44,6 @@ var express		= require('express'),
 };
 
 express()
+.use(express.bodyParser())
 .get('/api/ettoday/:id', controller.ettoday)
-.listen(host, port);
+.listen(port, host);
