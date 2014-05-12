@@ -1,8 +1,8 @@
-var SEMA_LIMIT	= 1,
-	NEWS_LIMIT	= parseInt(process.argv[2]),
+var NEWS_LIMIT	= parseInt(process.argv[2]),
 	START		= parseInt(process.argv[3]),
 	PARTITION	= parseInt(process.argv[4]),
-	FILE		= process.argv[5];
+	FILE		= process.argv[5],
+	SEMA_LIMIT	= parseInt(process.argv[6]);
 
 var fs			= require('fs'),
 	request		= require('request'),
@@ -17,23 +17,31 @@ var fs			= require('fs'),
 for (var i = 0; i <= NEWS_LIMIT; i++)
 	visited[i] = 0;
 
-var _req	= function() {
+var _req	= function(part) {
 	if (count <= NEWS_LIMIT) {
 		sema--;
-		var i		= count;
-		var tmp		= url + i + '.htm';
+		var i		= (part)? part: count,
+			tmp		= url + i + '.htm',
+			re		= false;
 		// console.log('Try:', tmp);
-		count += PARTITION;
+		if (part == undefined)
+			count += PARTITION;
 		request.get(tmp, function (e, res, body) {
-			var $	= cheerio.load(body);
-			console.log('Reach:', i);
-			visited[i]	= 1;
-			record[i]	= {
-				'id':		i,
-				'valid':	$('article').length
-			};
-			sema++;
-			if (sema > 0) _req();
+			if (body) {
+				var $	= cheerio.load(body);
+				console.log('Reach:', i);
+				visited[i]	= 1;
+				record[i]	= {
+					'id':		i,
+					'valid':	$('article').length
+				};
+				sema++;
+				if (sema > 0) _req();
+			}
+			else {
+				console.log('cannot read', i, 'retry');
+				_req(i);
+			}
 		});
 	}
 	else _final();
